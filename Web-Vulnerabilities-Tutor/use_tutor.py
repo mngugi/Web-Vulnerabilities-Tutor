@@ -2,20 +2,39 @@ import requests
 
 API_URL = "http://127.0.0.1:8000"
 
+def safe_post(endpoint, vuln):
+    """Send POST request safely and handle non-JSON responses."""
+    try:
+        response = requests.post(f"{API_URL}{endpoint}", json={"vulnerability": vuln})
+    except requests.exceptions.RequestException as e:
+        print(f"\nError connecting to API: {e}")
+        return None
+
+    try:
+        return response.json()
+    except ValueError:
+        # If response is not JSON, show raw text
+        print("\nResponse is not JSON, raw response:")
+        print(response.text)
+        return None
+
 def explain_vulnerability():
     vuln = input("Enter vulnerability to explain: ")
-    response = requests.post(f"{API_URL}/tutor/explain", json={"vulnerability": vuln})
-    print("\nResponse:\n", response.json())
+    data = safe_post("/tutor/explain", vuln)
+    if data:
+        print("\nExplanation:\n", data)
 
 def defence_vulnerability():
     vuln = input("Enter vulnerability to get defence guidance: ")
-    response = requests.post(f"{API_URL}/tutor/defence", json={"vulnerability": vuln})
-    print("\nResponse:\n", response.json())
+    data = safe_post("/tutor/defence", vuln)
+    if data:
+        print("\nDefence Guidance:\n", data)
 
 def quiz_vulnerability():
     vuln = input("Enter vulnerability to quiz: ")
-    response = requests.post(f"{API_URL}/tutor/quiz", json={"vulnerability": vuln})
-    print("\nResponse:\n", response.json())
+    data = safe_post("/tutor/quiz", vuln)
+    if data:
+        print("\nQuiz:\n", data)
 
 def main():
     print("=== Web Vulnerabilities Tutor ===")
