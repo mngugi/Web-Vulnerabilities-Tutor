@@ -2,14 +2,14 @@ import anthropic
 
 client = anthropic.Anthropic()
 
-def explain_vulnerability(text):
+class TutorAgent:
 
-    prompt = f"""
-You are a cybersecurity tutor.
+    def explain(self, vulnerability):
 
-Explain this vulnerability clearly:
+        prompt = f"""
+Explain this vulnerability:
 
-{text}
+{vulnerability}
 
 Include:
 1. What it is
@@ -18,10 +18,21 @@ Include:
 4. Defense techniques
 """
 
-    response = client.messages.create(
-        model="claude-3-sonnet",
-        max_tokens=800,
-        messages=[{"role":"user","content":prompt}]
-    )
+        response = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=800,
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-    return response.content[0].text
+        return {"lesson": response.content[0].text}
+
+
+    def defence(self, vulnerability):
+        return {"defence": f"Defence techniques for {vulnerability}"}
+
+
+    def quiz(self, vulnerability):
+        return {"quiz": f"What is the main risk of {vulnerability}?"}
+
+
+tutor = TutorAgent()
