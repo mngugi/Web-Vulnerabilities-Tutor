@@ -1,20 +1,23 @@
 from flask import Flask, request, jsonify
-from .search import search_vulnerability
-from .tutor_agent import ask_tutor   # <-- updated import
+from .tutor_agent import ask_tutor
 
 app = Flask(__name__)
 
+# Simple health check
 @app.route("/")
 def home():
     return jsonify({"message": "Web Vulnerabilities Beta API running"})
 
+# Main tutor route
 @app.route("/ask_tutor", methods=["GET"])
 def ask_tutor_route():
     query = request.args.get("q")
     if not query:
         return jsonify({"error": "No query provided"}), 400
 
+    # Call the AI tutor
     answer = ask_tutor(query)
+
     return jsonify({
         "query": query,
         "answer": answer

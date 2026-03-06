@@ -5,10 +5,10 @@ from ollama import Client
 # Instantiate Ollama client
 ollama = Client()
 
-# Use the actual local model installed
+# Use your actual Ollama model
 MODEL_NAME = "llama3.2:latest"
 
-# Path to local data
+# Load local vulnerability data if available
 DATA_FILE = os.path.join("data", "vulnerabilities.json")
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -20,16 +20,19 @@ def ask_tutor(question, history=[]):
     """
     Ask the AI tutor using local data + conversation history
     """
-    # 1️⃣ Build context from local vulnerability data
+    # 1️⃣ Build context from local data
     context_text = "\n\n".join([f"{r['title']}: {r['content']}" for r in LOCAL_DATA])
+    if not context_text:
+        context_text = "No local vulnerability data available."
 
-    # 2️⃣ Include last conversation messages
+    # 2️⃣ Include last 10 conversation messages
     conversation = "\n".join(history[-10:]) if history else ""
 
-    # 3️⃣ Build the prompt for the AI
+    # 3️⃣ Build the prompt
     prompt = f"""
-You are a Web Vulnerability tutor AI. Use the following context to answer the question:
+Use the context below to answer the user's question.
 
+Context:
 {context_text}
 
 Conversation history:
@@ -39,13 +42,15 @@ Question: {question}
 Answer:
 """
 
-    # 4️⃣ Query Ollama local model
+    # 4️⃣ Query Ollama
     try:
         response = ollama.chat(
             model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[
+                {"role": "system", "content": "You are a knowledgeable Web Vulnerability tutor. Answer clearly and concisely."},
+                {"role": "user", "content": prompt}
+            ]
         )
-        # Ollama SDK returns a dict with 'content'
         answer = response.get("content", "No answer returned")
     except Exception as e:
         answer = f"Error communicating with Ollama: {str(e)}"
