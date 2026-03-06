@@ -1,27 +1,32 @@
-import requests
-from ollama import client  # make sure Ollama Python SDK is installed
+import os
+import json
+from ollama import Client
 
-MCP_URL = "http://127.0.0.1:5000/ask"
-ollama = client  # Using your local Ollama model
+# Instantiate Ollama client
+ollama = Client()
+
+# Use the actual local model installed
+MODEL_NAME = "llama3.2:latest"
+
+# Path to local data
+DATA_FILE = os.path.join("data", "vulnerabilities.json")
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        LOCAL_DATA = json.load(f)
+else:
+    LOCAL_DATA = []
 
 def ask_tutor(question, history=[]):
     """
-    Ask the AI tutor a question.
-    1. Fetch top vulnerabilities from Flask JSONL API
-    2. Include last 10 messages of conversation
-    3. Pass context to Ollama and return answer
+    Ask the AI tutor using local data + conversation history
     """
-    # 1️⃣ Query Flask API for top matches
-    resp = requests.get(MCP_URL, params={"q": question})
-    results = resp.json().get("results", [])
+    # 1️⃣ Build context from local vulnerability data
+    context_text = "\n\n".join([f"{r['title']}: {r['content']}" for r in LOCAL_DATA])
 
-    # 2️⃣ Build context string
-    context_text = "\n\n".join([f"{r['title']}: {r['content']}" for r in results])
-
-    # 3️⃣ Include last conversation messages
+    # 2️⃣ Include last conversation messages
     conversation = "\n".join(history[-10:]) if history else ""
 
-    # 4️⃣ Build prompt
+    # 3️⃣ Build the prompt for the AI
     prompt = f"""
 You are a Web Vulnerability tutor AI. Use the following context to answer the question:
 
@@ -34,7 +39,15 @@ Question: {question}
 Answer:
 """
 
-    # 5️⃣ Query Ollama local model
-    response = ollama.chat(messages=[{"role": "user", "content": prompt}])
-    answer = response["content"]
+    # 4️⃣ Query Ollama local model
+    try:
+        response = ollama.chat(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        # Ollama SDK returns a dict with 'content'
+        answer = response.get("content", "No answer returned")
+    except Exception as e:
+        answer = f"Error communicating with Ollama: {str(e)}"
+
     return answer

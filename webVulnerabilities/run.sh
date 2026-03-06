@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Web Vulnerabilities Beta..."
+# Must be run from project root (where app/ and data/ exist)
 export FLASK_APP=app.main
 export FLASK_ENV=development
-python -m flask run --host=0.0.0.0 --port=5000
+flask run
