@@ -1,18 +1,32 @@
 import sqlite3
 
-DB_PATH = "data/webvuln_dataset.db"
+DB_PATH = "data/vulnerabilities.db"
 
-def search_vulnerabilities(keyword, limit=5):
-    """
-    Search vulnerabilities in the DB by keyword.
-    Returns a list of dicts: {"title": ..., "content": ...}
-    """
+def search_vulnerabilities(question):
+
     conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT title, content FROM vulnerabilities WHERE title LIKE ? OR content LIKE ? LIMIT ?",
-        (f"%{keyword}%", f"%{keyword}%", limit)
-    )
-    rows = cur.fetchall()
+    cursor = conn.cursor()
+
+    keyword = f"%{question}%"
+
+    cursor.execute("""
+        SELECT title, content
+        FROM vulnerabilities
+        WHERE title LIKE ?
+        OR content LIKE ?
+        LIMIT 5
+    """, (keyword, keyword))
+
+    rows = cursor.fetchall()
+
     conn.close()
-    return [{"title": r[0], "content": r[1]} for r in rows]
+
+    results = []
+
+    for r in rows:
+        results.append({
+            "title": r[0],
+            "content": r[1]
+        })
+
+    return results

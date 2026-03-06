@@ -5,10 +5,14 @@ app = Flask(__name__)
 
 @app.route("/query_vulns", methods=["POST"])
 def query_vulns():
+
     data = request.json
-    keyword = data.get("question", "")
-    results = search_vulnerabilities(keyword)
+    question = data.get("question", "")
+
+    results = search_vulnerabilities(question)
+
     return jsonify({"results": results})
 
+
 if __name__ == "__main__":
-    app.run(port=5050, debug=True)
+    app.run(port=5050)
