@@ -1,0 +1,28 @@
+# ── WebVuln-AI Requirements ────────────────────────────────────────────────────
+# Core AI
+anthropic>=0.40.0
+
+# Web framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# MCP (Model Context Protocol)
+mcp>=1.0.0
+
+# Async & networking
+aiohttp>=3.9.0
+websockets>=12.0
+
+# Env & config
+python-dotenv>=1.0.0
+
+# Data handling
+pyyaml>=6.0.1
+requests>=2.31.0
+
+# Markdown rendering (for Flask templates)
+markdown>=3.5.0
+
+# Dev tools (optional but useful)
+pytest>=7.4.0
+black>=23.0.0
